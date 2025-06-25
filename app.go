@@ -30,11 +30,6 @@ func (a *App) startup(ctx context.Context) {
 	}
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
 func (a *App) GetNamespaces() ([]string, error) {
 	if a.kube == nil {
 		return nil, fmt.Errorf("kube service not initialised or kubeconfig not found")
