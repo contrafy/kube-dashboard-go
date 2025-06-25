@@ -5,26 +5,23 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
 
+// KubeService streams pod-counts to the frontend
 type KubeService struct {
-	app       *application.App
+	ctx       context.Context
 	clientset *kubernetes.Clientset
 }
 
-// factory used in main.go
-func NewKubeService(app *application.App, kubeconfigPath string) (*KubeService, error) {
-	if kubeconfigPath == "" {
-		if h := homedir.HomeDir(); h != "" {
-			kubeconfigPath = filepath.Join(h, ".kube", "config")
-		}
-	}
-	cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+// NewKubeService constructs a clientset from the local kubeconfig
+func NewKubeService() (*KubeService, error) {
+	kc := filepath.Join(homedir.HomeDir(), ".kube", "config")
+	cfg, err := clientcmd.BuildConfigFromFlags("", kc)
 	if err != nil {
 		return nil, err
 	}
@@ -32,33 +29,43 @@ func NewKubeService(app *application.App, kubeconfigPath string) (*KubeService, 
 	if err != nil {
 		return nil, err
 	}
-
-	svc := &KubeService{app: app, clientset: cs}
-	go svc.runPoller() // start background loop
-	return svc, nil
+	return &KubeService{clientset: cs}, nil
 }
 
-// PodCount is callable from JS bindings
+// --- Wails lifecycle hooks ---
+
+// Startup is automatically called by Wails
+func (k *KubeService) Startup(ctx context.Context) {
+	k.ctx = ctx
+	go k.poll() // start background loop
+}
+
+// --- Methods callable from JS bindings ---
+
+// PodCount returns the current number of pods in the cluster
 func (k *KubeService) PodCount() (int, error) {
-	pods, err := k.clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+	pods, err := k.clientset.CoreV1().Pods("").List(context.TODO(), v1.ListOptions{})
 	if err != nil {
 		return 0, err
 	}
 	return len(pods.Items), nil
 }
 
-// --- private helpers ---
+// --- internal helpers ---
 
-func (k *KubeService) runPoller() {
-	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
+func (k *KubeService) poll() {
+	t := time.NewTicker(5 * time.Second)
+	defer t.Stop()
 
-	for range ticker.C {
-		cnt, err := k.PodCount()
-		if err != nil {
-			// optional: emit an error event or log
+	for range t.C {
+		if k.ctx == nil {
 			continue
 		}
-		k.app.EmitEvent("pod-count", cnt)
+		cnt, err := k.PodCount()
+		if err != nil {
+			// emit an error event instead if you like
+			continue
+		}
+		runtime.EventsEmit(k.ctx, "pod-count", cnt)
 	}
 }
