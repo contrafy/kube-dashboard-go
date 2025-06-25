@@ -1,6 +1,7 @@
 import {useState} from 'react';
-import logo from './assets/images/logo-universal.png';
 import './App.css';
+
+import { Button } from "@/components/ui/button"
 
 
 import {Greet, GetNamespaces} from "../wailsjs/go/main/App";
@@ -23,12 +24,8 @@ function App() {
 
     return (
         <div id="App">
-            <img src={logo} id="logo" alt="logo"/>
             <ul>{namespaces.map(ns => <li key={ns}>{ns}</li>)}</ul>
-            <div id="input" className="input-box">
-                <input id="name" className="input" onChange={updateName} autoComplete="off" name="input" type="text"/>
-                <button className="btn" onClick={loadNamespaces}>Get Namespaces</button>
-            </div>
+            <Button className="btn" onClick={loadNamespaces}>Get Namespaces</Button>
         </div>
     )
 }
