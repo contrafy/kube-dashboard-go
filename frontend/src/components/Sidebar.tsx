@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+
 import {
   Dialog,
   DialogTrigger,
@@ -25,11 +26,11 @@ export default function Sidebar({
 }: Props) {
   // local state only for Add‑Cluster dialog
   const [open, setOpen] = useState(false);
-  const [cfgText, setCfgText] = useState("\\");
+  const [cfgText, setCfgText] = useState("");
 
   const handleSave = () => {
     onAdd(cfgText);
-    setCfgText("\\");
+    setCfgText("");
     setOpen(false);
   };
 

@@ -1,6 +1,7 @@
 import "./App.css";
 import { useEffect, useState } from "react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 import Sidebar from "./components/Sidebar";
 import ClusterView from "./views/ClusterView";
@@ -15,18 +16,22 @@ export default function App() {
   const [selectedCluster, setSelectedCluster] = useState<string | undefined>();
   const [selectedNamespace, setSelectedNamespace] = useState<string | undefined>();
 
-  // ── helpers ────────────────────────────────────────────────────────────
   const refreshClusters = () =>
     ListClusters()
       .then(setClusters)
       .catch((e) => toast.error(String(e)));
 
+  // ── helper: select / toggle cluster ───────────────────────────────
   const handleClusterSelect = (name: string) => {
-    // Toggle behaviour; selecting a new cluster clears namespace selection.
-    setSelectedCluster((prev) => {
-      const newVal = prev === name ? undefined : name;
-      if (newVal === undefined) setSelectedNamespace(undefined);
-      return newVal;
+    setSelectedCluster(prev => {
+      if (prev === name) {
+        // clicked the same cluster ⇒ go “Home”
+        setSelectedNamespace(undefined);
+        return undefined;
+      }
+      // switched clusters ⇒ clear namespace selection
+      setSelectedNamespace(undefined);
+      return name;
     });
   };
 
@@ -39,6 +44,8 @@ export default function App() {
       .then(() => refreshClusters())
       .catch((e) => toast.error(String(e)));
 
+  const handleBack = () => setSelectedNamespace(undefined);   
+
   useEffect(() => {
     refreshClusters();
   }, []);
@@ -50,6 +57,7 @@ export default function App() {
       <NamespaceView
         clusterName={selectedCluster}
         namespace={selectedNamespace}
+        onBack={handleBack}
       />
     );
   } else if (selectedCluster) {

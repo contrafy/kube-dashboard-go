@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+
 import { GetWorkloadsFromNamespace } from "../../wailsjs/go/main/App";
 
 interface WorkloadResp {
@@ -9,10 +12,11 @@ interface WorkloadResp {
 
 interface Props {
   clusterName: string;
-  namespace: string;
+  namespace:   string;
+  onBack:      () => void;
 }
 
-export default function NamespaceView({ clusterName, namespace }: Props) {
+export default function NamespaceView({ clusterName, namespace, onBack }: Props) {
   const [workloads, setWorkloads] = useState<WorkloadResp | null>(null);
 
   useEffect(() => {
@@ -26,8 +30,12 @@ export default function NamespaceView({ clusterName, namespace }: Props) {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <header>
-        <h2 className="text-2xl font-bold">
+      <header className="flex items-center gap-4">
+        <Button variant="outline" size="icon" onClick={onBack}>
+          ←
+        </Button>
+
+        <h2 className="text-2xl font-bold whitespace-nowrap">
           {clusterName} / {namespace}
         </h2>
       </header>
