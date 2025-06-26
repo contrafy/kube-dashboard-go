@@ -199,3 +199,27 @@ func (a *App) GetNamespacesFromCluster(clusterName string) ([]string, error) {
 	}
 	return out, nil
 }
+
+// GetWorkloadsFromNamespace returns Deployments + StatefulSets for ns in a map
+// keyed by resource type.  The map form is easily JSON‑marshalable for Wails.
+func (a *App) GetWorkloadsFromNamespace(clusterName, namespace string) (map[string][]string, error) {
+	ci, ok := a.clusters[clusterName]
+	if !ok {
+		return nil, fmt.Errorf("cluster %q not found", clusterName)
+	}
+
+	ctx := context.Background()
+	deps, err := ci.Service.ListDeploymentNames(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
+	sts, err := ci.Service.ListStatefulSetNames(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string][]string{
+		"deployments":  deps,
+		"statefulsets": sts,
+	}, nil
+}

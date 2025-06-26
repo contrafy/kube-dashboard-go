@@ -57,3 +57,29 @@ func (ks *KubeService) GetNamespaces(ctx context.Context) ([]string, error) {
 	}
 	return out, nil
 }
+
+// ListDeploymentNames returns the names of all Deployments in the given ns.
+func (ks *KubeService) ListDeploymentNames(ctx context.Context, namespace string) ([]string, error) {
+	dList, err := ks.Client.AppsV1().Deployments(namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, len(dList.Items))
+	for i, d := range dList.Items {
+		out[i] = d.Name
+	}
+	return out, nil
+}
+
+// ListStatefulSetNames returns the names of StatefulSets in the namespace.
+func (ks *KubeService) ListStatefulSetNames(ctx context.Context, namespace string) ([]string, error) {
+	ssList, err := ks.Client.AppsV1().StatefulSets(namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, len(ssList.Items))
+	for i, ss := range ssList.Items {
+		out[i] = ss.Name
+	}
+	return out, nil
+}

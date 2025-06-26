@@ -5,4 +5,6 @@ export function AddCluster(arg1:string):Promise<string>;
 
 export function GetNamespacesFromCluster(arg1:string):Promise<Array<string>>;
 
+export function GetWorkloadsFromNamespace(arg1:string,arg2:string):Promise<Record<string, Array<string>>>;
+
 export function ListClusters():Promise<Array<string>>;
