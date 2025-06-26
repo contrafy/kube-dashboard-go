@@ -45,7 +45,7 @@ export default function Clusters() {
       .catch(e => setErr(String(e)))
 
   return (
-    <div className="flex h-screen flex-col items-center justify-start p-6 gap-4">
+    <div className="flex h-screen flex-col justify-start p-6 gap-4">
       {/* cluster buttons */}
       <div className="flex flex-col gap-2 w-full max-w-xs">
         {clusters.map(c => (
@@ -73,18 +73,6 @@ export default function Clusters() {
           </DialogContent>
         </Dialog>
       </div>
-
-      {/* namespaces preview (optional) */}
-      {namespaces.length > 0 && (
-        <div className="mt-4 w-full max-w-xs text-left">
-          <p className="font-semibold mb-1">Namespaces:</p>
-          <ul className="list-disc list-inside">
-            {namespaces.map(ns => (
-              <li key={ns}>{ns}</li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       {err && <p className="text-red-500">{err}</p>}
     </div>
