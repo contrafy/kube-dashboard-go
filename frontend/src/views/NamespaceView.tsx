@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-import { GetWorkloadsFromNamespace } from "../../wailsjs/go/main/App";
+import { GetResourcesFromNamespace, GetWorkloadsFromNamespace } from "../../wailsjs/go/main/App";
 
-interface WorkloadResp {
+interface NamespaceResources {
   deployments: string[];
   statefulsets: string[];
+  secrets: string[];
 }
 
 interface Props {
@@ -17,14 +18,11 @@ interface Props {
 }
 
 export default function NamespaceView({ clusterName, namespace, onBack }: Props) {
-  const [workloads, setWorkloads] = useState<WorkloadResp | null>(null);
+  const [resources, setResources] = useState<NamespaceResources | null>(null);
 
   useEffect(() => {
-    GetWorkloadsFromNamespace(clusterName, namespace)
-      .then((resp) => setWorkloads({
-        deployments: resp.deployments ?? [],
-        statefulsets: resp.statefulsets ?? [],
-      }))
+    GetResourcesFromNamespace(clusterName, namespace)
+      .then(setResources)
       .catch((e) => toast.error(String(e)));
   }, [clusterName, namespace]);
 
@@ -40,39 +38,59 @@ export default function NamespaceView({ clusterName, namespace, onBack }: Props)
         </h2>
       </header>
 
-      {workloads ? (
+      {resources ? (
         <>
-          {/* Deployments */}
-          <section>
+            {/* Deployments */}
+            <section>
             <h3 className="text-lg font-semibold mb-2">Deployments</h3>
-            {workloads.deployments.length > 0 ? (
-              <ul className="list-disc list-inside">
-                {workloads.deployments.map((d) => (
-                  <li key={d}>{d}</li>
+            {resources.deployments.length > 0 ? (
+                <div className="space-y-2">
+                {resources.deployments.map((d) => (
+                    <Button key={d} variant="outline" className="w-full justify-start">
+                    {d}
+                    </Button>
                 ))}
-              </ul>
+                </div>
             ) : (
-              <p className="text-muted-foreground">No deployments found.</p>
+                <p className="text-muted-foreground">No deployments found.</p>
             )}
-          </section>
+            </section>
 
-          {/* StatefulSets */}
-          <section>
+            {/* StatefulSets */}
+            <section>
             <h3 className="text-lg font-semibold mb-2">StatefulSets</h3>
-            {workloads.statefulsets.length > 0 ? (
-              <ul className="list-disc list-inside">
-                {workloads.statefulsets.map((s) => (
-                  <li key={s}>{s}</li>
+            {resources.statefulsets.length > 0 ? (
+                <div className="space-y-2">
+                {resources.statefulsets.map((s) => (
+                    <Button key={s} variant="outline" className="w-full justify-start">
+                    {s}
+                    </Button>
                 ))}
-              </ul>
+                </div>
             ) : (
-              <p className="text-muted-foreground">No statefulsets found.</p>
+                <p className="text-muted-foreground">No statefulsets found.</p>
             )}
-          </section>
+            </section>
+
+            {/* Secrets */}
+            <section>
+            <h3 className="text-lg font-semibold mb-2">Secrets</h3>
+            {resources.secrets.length > 0 ? (
+                <div className="space-y-2">
+                {resources.secrets.map((sec) => (
+                    <Button key={sec} variant="outline" className="w-full justify-start">
+                    {sec}
+                    </Button>
+                ))}
+                </div>
+            ) : (
+                <p className="text-muted-foreground">No secrets found.</p>
+            )}
+            </section>
         </>
-      ) : (
-        <p>Loading workloads…</p>
-      )}
+        ) : (
+        <p>Loading resources…</p>
+        )}
     </div>
   );
 }

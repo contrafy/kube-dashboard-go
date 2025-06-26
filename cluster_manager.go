@@ -22,6 +22,12 @@ type ClusterInfo struct {
 	Service *KubeService
 }
 
+type NamespaceResources struct {
+	Deployments  []string `json:"deployments"`
+	StatefulSets []string `json:"statefulsets"`
+	Secrets      []string `json:"secrets"`
+}
+
 // ---------- helpers ----------
 
 func kubeDir() (string, error) {
@@ -221,5 +227,35 @@ func (a *App) GetWorkloadsFromNamespace(clusterName, namespace string) (map[stri
 	return map[string][]string{
 		"deployments":  deps,
 		"statefulsets": sts,
+	}, nil
+}
+
+// GetResourcesFromNamespace fetches all relevant resource names from a namespace.
+func (a *App) GetResourcesFromNamespace(clusterName, namespace string) (*NamespaceResources, error) {
+	kc, ok := a.clusters[clusterName]
+	if !ok {
+		return nil, fmt.Errorf("cluster %q not found", clusterName)
+	}
+
+	ctx := context.Background()
+	deployments, err := kc.Service.ListDeploymentNames(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	statefulsets, err := kc.Service.ListStatefulSetNames(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	secrets, err := kc.Service.ListSecretNames(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return &NamespaceResources{
+		Deployments:  deployments,
+		StatefulSets: statefulsets,
+		Secrets:      secrets,
 	}, nil
 }

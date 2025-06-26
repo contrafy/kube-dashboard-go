@@ -10,6 +10,10 @@ export function GetNamespacesFromCluster(arg1) {
   return window['go']['main']['App']['GetNamespacesFromCluster'](arg1);
 }
 
+export function GetResourcesFromNamespace(arg1, arg2) {
+  return window['go']['main']['App']['GetResourcesFromNamespace'](arg1, arg2);
+}
+
 export function GetWorkloadsFromNamespace(arg1, arg2) {
   return window['go']['main']['App']['GetWorkloadsFromNamespace'](arg1, arg2);
 }

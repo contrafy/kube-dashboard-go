@@ -83,3 +83,16 @@ func (ks *KubeService) ListStatefulSetNames(ctx context.Context, namespace strin
 	}
 	return out, nil
 }
+
+// ListStatefulSetNames returns the names of StatefulSets in the namespace.
+func (ks *KubeService) ListSecretNames(ctx context.Context, namespace string) ([]string, error) {
+	sList, err := ks.Client.CoreV1().Secrets(namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, len(sList.Items))
+	for i, ss := range sList.Items {
+		out[i] = ss.Name
+	}
+	return out, nil
+}
