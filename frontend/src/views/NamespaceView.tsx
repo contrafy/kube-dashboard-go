@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-import { GetResourcesFromNamespace, GetWorkloadsFromNamespace } from "../../wailsjs/go/main/App";
+import { GetResourcesFromNamespace } from "../../wailsjs/go/main/App";
 
 interface NamespaceResources {
   deployments: string[];
